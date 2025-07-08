@@ -14,7 +14,13 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "lib": ["es2015", "es2016", "dom"],
-    "types": ["node"],
+    "types": [
+      "node",
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "styled-components"
+    ],
     "resolveJsonModule": true
   }
 }
