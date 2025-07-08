@@ -81,7 +81,7 @@ const DesignEdit = () => {
         const found = templates.find((t) => t.id === designId);
         if (found) {
           // Wait until the editor loads before calling loadDesign.
-          emailEditorRef.current?.editor?.loadDesign(found.design);
+          emailEditorRef.current?.editor?.loadDesign(found.design as any);
         }
       }
     } catch (e) {

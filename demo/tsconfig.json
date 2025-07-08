@@ -18,9 +18,9 @@
       "node",
       "react",
       "react-dom",
-      "react-router-dom",
       "styled-components"
     ],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   }
 }

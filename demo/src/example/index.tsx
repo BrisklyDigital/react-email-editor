@@ -70,7 +70,7 @@ const Example = () => {
       unlayer?.hidePreview();
       setPreview(false);
     } else {
-      unlayer?.showPreview('desktop');
+      unlayer?.showPreview('desktop' as any);
       setPreview(true);
     }
   };
@@ -82,7 +82,7 @@ const Example = () => {
   const onLoad: EmailEditorProps['onLoad'] = (unlayer) => {
     console.log('onLoad', unlayer);
     unlayer.addEventListener('design:loaded', onDesignLoad);
-    unlayer.loadDesign(sample);
+    unlayer.loadDesign(sample as any);
   };
 
   const onReady: EmailEditorProps['onReady'] = (unlayer) => {
