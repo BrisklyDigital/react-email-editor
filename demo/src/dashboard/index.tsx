@@ -7,9 +7,9 @@ import DesignEdit from './DesignEdit';
 const Dashboard = () => {
   return (
     <Routes>
-      <Route path="/" element={<DesignList />} />
-      <Route path={`/design/new`} element={<DesignEdit />} />
-      <Route path={`/design/edit/:designId`} element={<DesignEdit />} />
+      <Route index element={<DesignList />} />
+      <Route path="design/new" element={<DesignEdit />} />
+      <Route path="design/edit/:designId" element={<DesignEdit />} />
     </Routes>
   );
 };

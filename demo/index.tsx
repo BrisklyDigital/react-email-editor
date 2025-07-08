@@ -26,6 +26,9 @@ const App = () => {
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<Example />} />
+        {/* Multi-tenant dashboard. */}
+        <Route path="/tenant/:tenantId/dashboard/*" element={<Dashboard />} />
+        {/* Fallback single-tenant dashboard for backwards compatibility. */}
         <Route path="/dashboard/*" element={<Dashboard />} />
       </Routes>
     </Router>

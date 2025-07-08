@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import EmailEditor, { EditorRef } from '../../../src'; // use react-email-editor instead
 
@@ -53,15 +53,71 @@ const Bar = styled.div`
   }
 `;
 
+// Helper to persist templates per tenant in localStorage.
+const getTemplatesKey = (tenant: string) => `templates_${tenant}`;
+
+interface SavedTemplate {
+  id: string;
+  name: string;
+  design: unknown;
+}
+
 const DesignEdit = () => {
   const emailEditorRef = useRef<EditorRef | null>(null);
+
+  const navigate = useNavigate();
+  const { tenantId, designId } = useParams();
+
+  const effectiveTenant = tenantId || 'default';
+
+  // Load existing design if editing.
+  useEffect(() => {
+    if (!designId || designId === 'new') return;
+    const key = getTemplatesKey(effectiveTenant);
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const templates: SavedTemplate[] = JSON.parse(stored);
+        const found = templates.find((t) => t.id === designId);
+        if (found) {
+          // Wait until the editor loads before calling loadDesign.
+          emailEditorRef.current?.editor?.loadDesign(found.design);
+        }
+      }
+    } catch (e) {
+      console.error('Unable to load template', e);
+    }
+  }, [designId, effectiveTenant]);
 
   const saveDesign = () => {
     const unlayer = emailEditorRef.current?.editor;
 
     unlayer?.saveDesign((design) => {
-      console.log('saveDesign', design);
-      alert('Design JSON has been logged in your developer console.');
+      const name = prompt('Template name:', 'My template') || 'Unnamed';
+      const id = designId && designId !== 'new' ? designId : Date.now().toString();
+
+      const key = getTemplatesKey(effectiveTenant);
+      let templates: SavedTemplate[] = [];
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) templates = JSON.parse(stored);
+      } catch (_) {}
+
+      const existingIndex = templates.findIndex((t) => t.id === id);
+      if (existingIndex >= 0) {
+        templates[existingIndex] = { id, name, design };
+      } else {
+        templates.push({ id, name, design });
+      }
+
+      localStorage.setItem(key, JSON.stringify(templates));
+
+      alert('Template saved!');
+
+      // Redirect to list after saving new template.
+      if (!designId || designId === 'new') {
+        navigate(tenantId ? `/tenant/${tenantId}/dashboard` : `/dashboard`);
+      }
     });
   };
 
@@ -70,8 +126,15 @@ const DesignEdit = () => {
 
     unlayer?.exportHtml((data) => {
       const { html } = data;
-      console.log('exportHtml', html);
-      alert('Output HTML has been logged in your developer console.');
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'template.html';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     });
   };
 
@@ -80,7 +143,9 @@ const DesignEdit = () => {
       <Bar>
         <h1>React Email Editor (Demo)</h1>
 
-        <Link to={`/dashboard`}>Dashboard</Link>
+        <Link to={tenantId ? `/tenant/${tenantId}/dashboard` : `/dashboard`}>
+          Dashboard
+        </Link>
         <button onClick={saveDesign}>Save Design</button>
         <button onClick={exportHtml}>Export HTML</button>
       </Bar>
@@ -88,10 +153,10 @@ const DesignEdit = () => {
       <EmailEditor
         ref={emailEditorRef}
         options={{
-          version: "latest",
+          version: 'latest',
           appearance: {
-            theme: "modern_light"
-          }
+            theme: 'modern_light',
+          },
         }}
       />
     </Container>
